@@ -11,6 +11,8 @@ import catalogue.Product;
 import debug.DEBUG;
 import middle.StockException;
 import middle.StockReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import java.sql.*;
@@ -171,5 +173,21 @@ public class StockR implements StockReader
     //DEBUG.trace( "DB StockR: getImage -> %s", filename );
     return new ImageIcon( filename );
   }
+  
+  public synchronized List<String> getAllProductNumbers() throws StockException {
+	    List<String> productNumbers = new ArrayList<>();
+	    try {
+	        ResultSet rs = getStatementObject().executeQuery(
+	            "SELECT productNo FROM ProductTable"
+	        );
+	        while (rs.next()) {
+	            productNumbers.add(rs.getString("productNo"));
+	        }
+	        rs.close();
+	    } catch (SQLException e) {
+	        throw new StockException("SQL getAllProductNumbers: " + e.getMessage());
+	    }
+	    return productNumbers;
+	}
 
 }

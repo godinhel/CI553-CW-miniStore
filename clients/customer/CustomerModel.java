@@ -9,6 +9,9 @@ import middle.StockException;
 import middle.StockReader;
 
 import javax.swing.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 /**
@@ -130,5 +133,85 @@ public class CustomerModel extends Observable
   {
     return new Basket();
   }
+  
+  public void addToOrder(String productNum) {
+	    try {
+	        if (theStock.exists(productNum)) {
+	            Product pr = theStock.getDetails(productNum);
+	            theBasket.add(pr); // Add product to the basket
+	            setChanged();
+	            notifyObservers("Added " + pr.getDescription() + " to the order.");
+	        } else {
+	            setChanged();
+	            notifyObservers("Product not found.");
+	        }
+	    } catch (StockException e) {
+	        DEBUG.error("CustomerModel.addToOrder\n" + e.getMessage());
+	    }
+	}
+
+  public List<Product> getAvailableProducts() {
+	    List<Product> products = new ArrayList<>();
+	    try {
+	        List<String> productNumbers = theStock.getAllProductNumbers();
+	        for (String productNum : productNumbers) {
+	            Product product = theStock.getDetails(productNum);
+	            products.add(product);
+	        }
+	    } catch (StockException e) {
+	        DEBUG.error("CustomerModel.getAvailableProducts\n" + e.getMessage());
+	    }
+	    return products;
+	}
+  
+  public void addToBasket(String productNum, int quantity) {
+	    try {
+	        if (theStock.exists(productNum)) {
+	            Product product = theStock.getDetails(productNum); // Fetch product from stock
+	            product.setQuantity(quantity); // Set the quantity
+	            theBasket.add(product); // Add product to the basket
+	            System.out.println("Added to basket: " + product.getDescription() + " x " + quantity);
+	            setChanged();
+	            notifyObservers(); // Notify the view to update
+	        } else {
+	            System.out.println("Product not found in stock: " + productNum);
+	        }
+	    } catch (StockException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+  
+  public void removeProductFromBasket(String productNum) {
+	    theBasket.removeIf(product -> product.getProductNum().equals(productNum));
+	    setChanged();
+	    notifyObservers(); // Notify view to update basket display
+	}
+
+  public void sendBasketToCashier() {
+	    try {
+	        if (!theBasket.isEmpty()) {
+	            System.out.println("Sending basket to cashier...");
+	            // Logic to send the basket to the cashier (e.g., via an OrderProcessor)
+	            theBasket.clear(); // Clear basket after sending
+	            setChanged();
+	            notifyObservers(); // Notify view to clear basket display
+	        } else {
+	            System.out.println("Basket is empty. Nothing to send.");
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+  
+  public void clearBasket() {
+	    theBasket.clear();
+	    setChanged();
+	    notifyObservers(); // Update the view to reflect the empty basket
+	}
+
+
+  
+
 }
 
