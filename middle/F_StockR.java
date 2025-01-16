@@ -16,6 +16,11 @@ import remote.RemoteStockR_I;
 import javax.swing.*;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Setup connection to the middle tier
@@ -25,6 +30,7 @@ public class F_StockR implements StockReader
 {
   private RemoteStockR_I aR_StockR   = null;
   private String         theStockURL = null;
+  private Statement  theStmt   = null;  
 
   public F_StockR( String url )
   {
@@ -104,5 +110,30 @@ public class F_StockR implements StockReader
       throw new StockException( "Net: " + e.getMessage() );
     }
   }
+  
+  protected Statement getStatementObject()
+  {
+    return theStmt;
+  }
+
+
+@Override
+public synchronized List<String> getAllProductNumbers() throws StockException {
+    List<String> productNumbers = new ArrayList<>();
+    try {
+        ResultSet rs = getStatementObject().executeQuery(
+            "SELECT productNo FROM ProductTable"
+        );
+        while (rs.next()) {
+            productNumbers.add(rs.getString("productNo"));
+        }
+        rs.close();
+    } catch (SQLException e) {
+        throw new StockException("SQL getAllProductNumbers: " + e.getMessage());
+    }
+    return productNumbers;
+}
 
 }
+
+

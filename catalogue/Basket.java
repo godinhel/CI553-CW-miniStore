@@ -55,42 +55,48 @@ public class Basket extends ArrayList<Product> implements Serializable
    */
   // Will be in the Java doc for Basket
   @Override
-  public boolean add( Product pr )
-  {                              
-    return super.add( pr );     // Call add in ArrayList
+  public boolean add(Product newProduct) {
+      if (newProduct == null) {
+          throw new IllegalArgumentException("Cannot add a null product to the basket.");
+      }
+
+      // Check if the product already exists in the basket
+      for (Product product : this) {
+          if (product.getProductNum().equals(newProduct.getProductNum())) {
+              // Update the quantity of the existing product
+              int updatedQuantity = product.getQuantity() + newProduct.getQuantity();
+              product.setQuantity(updatedQuantity);
+              return true; // Successfully updated
+          }
+      }
+
+      // If the product doesn't exist, add it as a new entry
+      return super.add(newProduct);
   }
 
   /**
    * Returns a description of the products in the basket suitable for printing.
    * @return a string description of the basket products
    */
-  public String getDetails()
-  {
-    Locale uk = Locale.UK;
-    StringBuilder sb = new StringBuilder(256);
-    Formatter     fr = new Formatter(sb, uk);
-    String csign = (Currency.getInstance( uk )).getSymbol();
-    double total = 0.00;
-    if ( theOrderNum != 0 )
-      fr.format( "Order number: %03d\n", theOrderNum );
-      
-    if ( this.size() > 0 )
-    {
-      for ( Product pr: this )
-      {
-        int number = pr.getQuantity();
-        fr.format("%-7s",       pr.getProductNum() );
-        fr.format("%-14.14s ",  pr.getDescription() );
-        fr.format("(%3d) ",     number );
-        fr.format("%s%7.2f",    csign, pr.getPrice() * number );
-        fr.format("\n");
-        total += pr.getPrice() * number;
-      }
-      fr.format("----------------------------\n");
-      fr.format("Total                       ");
-      fr.format("%s%7.2f\n",    csign, total );
-      fr.close();
-    }
-    return sb.toString();
-  }
+  public String getDetails() {
+	    StringBuilder details = new StringBuilder();
+	    double totalPrice = 0.0;
+
+	    for (Product product : this) {
+	        double productTotal = product.getPrice() * product.getQuantity();
+	        totalPrice += productTotal;
+	        details.append(product.getDescription())
+	               .append(" - £")
+	               .append(product.getPrice())
+	               .append(" x ")
+	               .append(product.getQuantity())
+	               .append(" = £")
+	               .append(String.format("%.2f", productTotal))
+	               .append("\n");
+	    }
+
+	    details.append("\nTotal Price: £").append(String.format("%.2f", totalPrice));
+	    return details.toString();
+	}
+
 }

@@ -2,6 +2,10 @@ package middle;
 
 import catalogue.Product;
 
+import java.sql.ResultSet;
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
 /**
@@ -39,4 +43,7 @@ public interface StockReader
    */
   
   ImageIcon getImage(String pNum) throws StockException;
+
+  List<String> getAllProductNumbers() throws StockException;
+
 }
